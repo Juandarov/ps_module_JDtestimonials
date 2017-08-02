@@ -38,6 +38,16 @@ namespace
                 ');
         }
 
+        public function installTab()
+        {
+            $parent_tab = new Tab();
+            $parent_tab->name[$this->context->language->id] = $this->l('Testimonials');
+            $parent_tab->class_name = 'AdminJDTestimonials';
+            $parent_tab->id_parent = 0; // Home tab
+            $parent_tab->module = $this->name;
+            return $parent_tab->add();
+        }
+
         public function install()
         {
             if (Shop::isFeatureActive()) {
@@ -47,7 +57,8 @@ namespace
             if (!parent::install() ||
             !$this->registerHook('leftColumn') ||
             !$this->registerHook('header') ||
-            !$this->installdb()
+            !$this->installdb() ||
+            !$this->installTab()
         ) {
             return false;
         }
@@ -62,6 +73,8 @@ namespace
 
         public function uninstall()
         {
+            $tab = new Tab((int)Tab::getIdFromClassName('AdminJDTestimonials'));
+            $tab -> delete();
 
             if (!parent::uninstall() ||
             !$this->uninstalldb()
