@@ -17,15 +17,26 @@ namespace
             parent::__construct();
 
             $this->displayName = $this->l('testimonials');
-            $this->description = $this->l('Description of my module for displaying a blog.');
+            $this->description = $this->l('Description of my module for displaying testimonials.');
 
             $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
 
-            if (!Configuration::get('Testimonials')) {
+            if (!Configuration::get('JDTestimonials')) {
                 $this->warning = $this->l('No name provided');
             }
         }
 
+        public function installdb()
+        {
+            return Db::getInstance()->Execute('
+            CREATE TABLE IF NOT EXISTS '._DB_PREFIX_.'testimonials (
+                `id_testimonials` int(11) NOT NULL AUTO_INCREMENT,
+                `author`  char(100) NOT NULL,
+                `body` text NOT NULL,
+                PRIMARY KEY (`id_testimonials`)
+                ) ENGINE= '._MYSQL_ENGINE_.'  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+                ');
+        }
 
         public function install()
         {
@@ -35,7 +46,8 @@ namespace
 
             if (!parent::install() ||
             !$this->registerHook('leftColumn') ||
-            !$this->registerHook('header')
+            !$this->registerHook('header') ||
+            !$this->installdb()
         ) {
             return false;
         }
@@ -43,18 +55,21 @@ namespace
         return true;
         }
 
+        public function uninstalldb() {
+
+            return Db::getInstance()->Execute('DROP TABLE '._DB_PREFIX_.'testimonials');
+        }
 
         public function uninstall()
         {
 
             if (!parent::uninstall() ||
-            !Configuration::deleteByName('Testimonials')
+            !$this->uninstalldb()
             ) {
                 return false;
             }
 
             return true;
         }
-
     }
 }
